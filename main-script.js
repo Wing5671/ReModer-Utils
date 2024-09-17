@@ -19,7 +19,6 @@
         settingContainer.className = 'setting';
         settingContainer.style.position = 'relative';
 
-        // Создание кнопки информации
         const infoButton = document.createElement('button');
         infoButton.textContent = 'i';
         infoButton.style.cssText = `
@@ -46,13 +45,11 @@
         };
         settingContainer.appendChild(infoButton);
 
-        // Создание текста метки
         const label = document.createElement('label');
         label.textContent = setting.label;
-        label.style.marginLeft = '28px'; // Отступ, чтобы текст не перекрывался с кнопкой информации
+        label.style.marginLeft = '28px'; 
         settingContainer.appendChild(label);
 
-        // Создание переключателя
         const toggle = document.createElement('div');
         toggle.className = 'toggle';
         toggle.id = setting.key;
