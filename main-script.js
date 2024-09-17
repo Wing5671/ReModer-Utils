@@ -933,15 +933,6 @@
     `);
 
     document.addEventListener("DOMContentLoaded", function(event){
-        const str = '?filter=%7B%22status%22%3A%221_open%22%7D&order=DESC&page=1&perPage=400&sort=created_at'
-        if (!window.location.href.includes('https://panel.remanga.org/requests') || window.location.href.includes('https://panel.remanga.org/requests/')) {
-            return;
-        } else {
-            if (!window.location.href.includes(str)) {
-                const newUrl = window.location.origin + window.location.pathname + str;
-                window.location.href = newUrl;
-            }
-        }
         if (loadToggleState('fixElements')) {
             toggle_elements = true;
         }
@@ -954,7 +945,15 @@
             autoScrollInterval = setInterval(() => {
                 window.scrollBy(0, scrollSpeed);
             }, scrollInterval);
-            AutoScroll()
+        }
+        const str = '?filter=%7B%22status%22%3A%221_open%22%7D&order=DESC&page=1&perPage=400&sort=created_at'
+        if (!window.location.href.includes('https://panel.remanga.org/requests') || window.location.href.includes('https://panel.remanga.org/requests/')) {
+            return;
+        } else {
+            if (!window.location.href.includes(str)) {
+                const newUrl = window.location.origin + window.location.pathname + str;
+                window.location.href = newUrl;
+            }
         }
     });
 
