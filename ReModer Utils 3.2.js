@@ -412,16 +412,25 @@
         Object.keys(rankCards).forEach(rank => {
             const cards = rankCards[rank];
             const lang_keys = {
-                1 : 'карточка',
-                4 : 'карточки',
-                5 : 'карточек'
+                1 : 'карточка', 2 : 'карточки', 3 : 'карточки', 4 : 'карточки', 5 : 'карточек'
             }
-            const word = 'карточек'
+            let word = 'карточек'
 
             if (cards.length > 0) {
-                if (cards.length === 1) {word = lang_keys[cards.length]}
-                if (cards.length <= 4 && !1) {word = lang_keys[cards.length]}
-                if (cards.length >= 5) {word = lang_keys[cards.length]}
+                if (cards.length === 1) {
+                    word = lang_keys[cards.length]
+                } else {
+                    if (
+                        cards.length <= 4 && cards.length != 1
+                    ) {
+                        word = lang_keys[cards.length]
+                    };
+                    if (
+                        cards.length >= 5
+                    ) {
+                        word = lang_keys[cards.length]
+                    };
+                }
                 const rankRow = document.createElement("div");
                 rankRow.style.cssText = `
                     display: flex;
