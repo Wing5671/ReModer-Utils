@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.2.4
+// @version      3.2.5
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -21,7 +21,7 @@
         settingContainer.style.position = 'relative';
 
         const infoButton = document.createElement('button');
-        infoButton.textContent = 'i';
+        infoButton.textContent = '❔';
         infoButton.style.cssText = `
             position: absolute;
             top: 31%;
