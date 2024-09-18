@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.1
+// @version      3.2
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -1001,13 +1001,22 @@
 
     ReactBypass.observe(document.body, { childList: true, subtree: true });
     document.addEventListener("dblclick", function(event) {
-        if (sizebtn) {
         const element = event.target;
-        const width = element.offsetWidth;
-        const height = element.offsetHeight;
-        const aspectRatio = (width / height).toFixed(2);
-        alert(`Ширина: ${width}px, Высота: ${height}px, Соотношение сторон: ${aspectRatio}`);
-    }});
+    
+        if (element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.isContentEditable) {
+            return;
+        }
+    
+        const targetWithinSelector = document.querySelector('.css-ce1toi');
+        
+        if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element)) {
+            const width = element.offsetWidth;
+            const height = element.offsetHeight;
+            const aspectRatio = (width / height).toFixed(2);
+            alert(`Ширина: ${width}px, Высота: ${height}px, Соотношение сторон: ${aspectRatio}`);
+        }
+    });
+    
 
     // ------------------------------------------------------------------------- Listeners
 
