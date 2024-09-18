@@ -411,8 +411,17 @@
         {
         Object.keys(rankCards).forEach(rank => {
             const cards = rankCards[rank];
+            const lang_keys = {
+                1 : 'карточка',
+                4 : 'карточки',
+                5 : 'карточек'
+            }
+            const word = 'карточек'
 
             if (cards.length > 0) {
+                if (cards.length === 1) {word = lang_keys[cards.length]}
+                if (cards.length <= 4 && !1) {word = lang_keys[cards.length]}
+                if (cards.length >= 5) {word = lang_keys[cards.length]}
                 const rankRow = document.createElement("div");
                 rankRow.style.cssText = `
                     display: flex;
@@ -422,7 +431,7 @@
             `;
 
                 const rankTitle = document.createElement("p");
-                rankTitle.textContent = `${rank.toUpperCase()}: ${cards.length} карточек`;
+                rankTitle.textContent = `${rank.toUpperCase()}: ${cards.length} ${word}`;
                 rankTitle.style.cssText = `
                     margin: 0;
                     font-size: 16px;
