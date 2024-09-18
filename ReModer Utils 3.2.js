@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.2
+// @version      3.2.1 
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -995,8 +995,9 @@
         }
     
         const targetWithinSelector = document.querySelector('.css-ce1toi');
+        const targetWithinSelectorImage = document.querySelector('.css-1domaf0');
         
-        if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element)) {
+        if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element) && targetWithinSelectorImage && targetWithinSelectorImage.contains(element)) {
             const width = element.offsetWidth;
             const height = element.offsetHeight;
             const aspectRatio = (width / height).toFixed(2);
