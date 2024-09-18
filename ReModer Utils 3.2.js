@@ -997,7 +997,7 @@
         const targetWithinSelector = document.querySelector('.css-ce1toi');
         const targetWithinSelectorImage = document.querySelector('.css-1domaf0');
         
-        if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element) && targetWithinSelectorImage && targetWithinSelectorImage.contains(element)) {
+        if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element) || sizebtn && targetWithinSelectorImage && targetWithinSelectorImage.contains(element)) {
             const width = element.offsetWidth;
             const height = element.offsetHeight;
             const aspectRatio = (width / height).toFixed(2);
