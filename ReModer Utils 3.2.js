@@ -14,6 +14,7 @@
     'use strict';
 
     let toggle_elements = false;
+    let AutoSort = false;
     function createToggle(setting) {
         const settingContainer = document.createElement('div');
         settingContainer.className = 'setting';
@@ -113,6 +114,18 @@
                     sizeElement();
                 }
             }
+        },
+        {
+            key: 'AutoSort',
+            label: 'Автоматическая сортировка',
+            info: 'Если включить эту опцию, после каждого перехода на /requests (обновление страницы), будут автоматически установлены фильтры по времени (от нового к старому), раскрыто максимальное кол-во карт на странице, и тип заявки будет установлен на открытые.',
+            onToggle: (state) => {
+                if (state) {
+                    AutoSrt();
+                } else {
+                    AutoSrt();
+                }
+            }
         }
     ];
 
@@ -144,6 +157,12 @@
 
     function sizeElement() {
         sizebtn = !sizebtn;
+    };
+
+    // ------------------------------------------------------------------------- AutoSortFunc
+
+    function AutoSrt() {
+        AutoSort = !AutoSort;
     };
 
     // ------------------------------------------------------------------------- characterCards
@@ -1044,16 +1063,26 @@
             }
         }
     });
-const str = '?filter=%7B%22status%22%3A%221_open%22%7D&order=DESC&page=1&perPage=400&sort=created_at'
-if (!window.location.href.includes('https://panel.remanga.org/requests') || window.location.href.includes('https://panel.remanga.org/requests/')) {
-    return;
-} else {
-    if (!window.location.href.includes(str)) {
-        const newUrl = window.location.origin + window.location.pathname + str;
-        window.location.href = newUrl;
+const str = '?filter=%7B%22status%22%3A%221_open%22%2C%22type%22%3A%5B%22character_update%22%2C%22character_add%22%2C%22card_item_add%22%2C%22card_item_update%22%5D%7D&order=DESC&page=1&perPage=400&sort=created_at'
+if (loadToggleState('AutoSort')) {
+    if (
+        !window.location.href.includes(
+            'https://panel.remanga.org/requests'
+        ) || window.location.href.includes(
+            'https://panel.remanga.org/requests/'
+        )
+    ) {
+        return;
+    } else {
+        if (
+            !window.location.href.includes(str)
+            ) 
+        {
+            const newUrl = window.location.origin + window.location.pathname + str;
+            window.location.href = newUrl;
+        }
     }
 }
-
 if (loadToggleState('fixElements')) {
     toggle_elements = true;
 }
