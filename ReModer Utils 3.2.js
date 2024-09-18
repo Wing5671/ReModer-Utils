@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.2.1 
+// @version      3.2.2
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
