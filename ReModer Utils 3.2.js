@@ -8,9 +8,6 @@
 // @connect      remanga.org
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
-// @homepageURL    https://github.com/Wing5671/ReModer-Utils
-// @updateURL      https://raw.githubusercontent.com/Wing5671/ReModer-Utils/main/ReModer%20Utils%203.2.js
-// @downloadURL    https://raw.githubusercontent.com/Wing5671/ReModer-Utils/main/ReModer%20Utils%203.2.js
 // ==/UserScript==
 
 (function() {
@@ -18,6 +15,7 @@
 
     let toggle_elements = false;
     let AutoSort = false;
+    let autored = false;
     function createToggle(setting) {
         const settingContainer = document.createElement('div');
         settingContainer.className = 'setting';
@@ -51,7 +49,7 @@
 
         const label = document.createElement('label');
         label.textContent = setting.label;
-        label.style.marginLeft = '28px'; 
+        label.style.marginLeft = '28px';
         settingContainer.appendChild(label);
 
         const toggle = document.createElement('div');
@@ -96,8 +94,8 @@
         },
         {
             key: 'AutoSort',
-            label: 'Автоматическая сортировка',
-            info: 'Если включить эту опцию, после каждого перехода на /requests (обновление страницы), будут автоматически установлены фильтры по времени (от нового к старому), раскрыто максимальное кол-во карт на странице, и тип заявки будет установлен на открытые.',
+            label: 'Автоматическая сортировка ⚠ (check "❔") ',
+            info: 'Если включить эту опцию, после каждого перехода на /requests (обновление страницы), будут автоматически установлены фильтры по времени (от нового к старому), раскрыто максимальное кол-во карт на странице (200), и тип заявки будет установлен на открытые. <br><h1>⚠ не используйте данный параметр когда суммарное кол-во заявок превышает 200</h1>',
             onToggle: (state) => {
                 if (state) {
                     AutoSrt();
@@ -127,6 +125,18 @@
                     sizeElement();
                 } else {
                     sizeElement();
+                }
+            }
+        },
+        {
+            key: 'autoRedirect',
+            label: '❌ Авто-редирект на следующую заявку',
+            info: 'После принятия/отклонения заявки вы будете автоматически перенаправлены на следующую заявку в списке.',
+            onToggle: (state) => {
+                if (state) {
+                    AutoRedirect();
+                } else {
+                    AutoRedirect();
                 }
             }
         }
@@ -165,6 +175,12 @@
 
     function sizeElement() {
         sizebtn = !sizebtn;
+    };
+
+    // ------------------------------------------------------------------------- Redirect
+
+    function AutoRedirect() {
+        autored = !autored;
     };
 
     // ------------------------------------------------------------------------- AutoSortFunc
@@ -733,7 +749,7 @@
             padding: 20px;
             color: white;
             border-radius: 10px;
-            width: 400px;
+            width: 500px;
             max-width: 90%;
             text-align: center;
             animation: popupIn 0.3s forwards;
@@ -929,6 +945,10 @@
         .toggle.active {
             background-color: #4cd137;
         }
+        h1 {
+        color: #FFFF00;
+        font-size: 24px;
+        }
         .toggle.active:before {
             transform: translateX(20px);
         }
@@ -1022,14 +1042,14 @@
     ReactBypass.observe(document.body, { childList: true, subtree: true });
     document.addEventListener("dblclick", function(event) {
         const element = event.target;
-    
+
         if (element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.isContentEditable) {
             return;
         }
-    
+
         const targetWithinSelector = document.querySelector('.css-ce1toi');
         const targetWithinSelectorImage = document.querySelector('.css-1domaf0');
-        
+
         if (sizebtn && targetWithinSelector && targetWithinSelector.contains(element) || sizebtn && targetWithinSelectorImage && targetWithinSelectorImage.contains(element)) {
             const width = element.offsetWidth;
             const height = element.offsetHeight;
@@ -1037,7 +1057,7 @@
             alert(`Ширина: ${width}px, Высота: ${height}px, Соотношение сторон: ${aspectRatio}`);
         }
     });
-    
+
 
     // ------------------------------------------------------------------------- Listeners
 
@@ -1084,7 +1104,7 @@ if (loadToggleState('AutoSort')) {
     } else {
         if (
             !window.location.href.includes(str)
-            ) 
+            )
         {
             const newUrl = window.location.origin + window.location.pathname + str;
             window.location.href = newUrl;
@@ -1096,6 +1116,10 @@ if (loadToggleState('fixElements')) {
 }
 if (loadToggleState('elementSize')) {
     sizebtn = true;
+}
+if (loadToggleState('autoRedirect')) {
+    autored = true;
+    // fetchRequests()
 }
 if (loadToggleState('autoScroll')) {
     if (
