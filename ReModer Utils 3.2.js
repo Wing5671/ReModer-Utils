@@ -138,12 +138,17 @@
             clearInterval(autoScrollInterval);
             autoScrollInterval = null;
         } else {
-
-            const scrollSpeed = 300;
-            const scrollInterval = 1;
-            autoScrollInterval = setInterval(() => {
-                window.scrollBy(0, scrollSpeed);
-            }, scrollInterval);
+            if (
+                !window.location.href.includes('https://panel.remanga.org/requests')
+            ) {
+                return;
+            } else {
+                const scrollSpeed = 300;
+                const scrollInterval = 1;
+                autoScrollInterval = setInterval(() => {
+                    window.scrollBy(0, scrollSpeed);
+                }, scrollInterval);
+            }
         }
     };
 
@@ -1090,10 +1095,16 @@ if (loadToggleState('elementSize')) {
     sizebtn = true;
 }
 if (loadToggleState('autoScroll')) {
-    const scrollSpeed = 300;
-    const scrollInterval = 1;
-    autoScrollInterval = setInterval(() => {
-        window.scrollBy(0, scrollSpeed);
-    }, scrollInterval);
+    if (
+        !window.location.href.includes('https://panel.remanga.org/requests')
+    ) {
+        return;
+    } else {
+        const scrollSpeed = 300;
+        const scrollInterval = 1;
+        autoScrollInterval = setInterval(() => {
+            window.scrollBy(0, scrollSpeed);
+        }, scrollInterval);
+    }
 }
 })();
