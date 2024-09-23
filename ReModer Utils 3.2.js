@@ -8,6 +8,9 @@
 // @connect      remanga.org
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
+// @homepageURL    https://github.com/Wing5671/ReModer-Utils
+// @updateURL      https://raw.githubusercontent.com/Wing5671/ReModer-Utils/main/ReModer%20Utils%203.2.js
+// @downloadURL    https://raw.githubusercontent.com/Wing5671/ReModer-Utils/main/ReModer%20Utils%203.2.js
 // ==/UserScript==
 
 (function() {
