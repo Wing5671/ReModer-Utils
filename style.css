@@ -1,6 +1,6 @@
 .glow-text {
-  margin: 30px;
-  font-size: 20px;
+  margin: 20px;
+  font-size: 25px;
   font-weight: bold;
   color: #00ccff; /* Синий неоновый цвет */
   text-shadow: 0 0 10px #00ccff, 0 0 20px #0099ff, 0 0 30px #0066ff;
@@ -10,7 +10,8 @@
   position: relative;
   font-family: 'Courier New', Courier, monospace; /* Шрифт в стиле терминала */
   animation: glow 2s infinite alternate;
-  overflow: hidden;
+  overflow: visible; /* Открыть содержимое за границами контейнера */
+  padding: 20px; /* Добавить дополнительные отступы, чтобы свечение не обрезалось */
 }
 
 @keyframes glow {
