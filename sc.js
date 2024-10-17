@@ -9,5 +9,5 @@ link.onload = () => {
 link.onerror = () => {
   console.error(`Failed to load stylesheet: ${link.href}`);
 };
-
+document.querySelector('.glow-text').textContent = `Коллекционная карточка за тех. работы. Простите)`;
 document.head.appendChild(link);
