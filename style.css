@@ -1,6 +1,6 @@
 .glow-text {
-  margin: 20px;
-  font-size: 30px;
+  margin: 30px;
+  font-size: 20px;
   font-weight: bold;
   color: #00ccff; /* Синий неоновый цвет */
   text-shadow: 0 0 10px #00ccff, 0 0 20px #0099ff, 0 0 30px #0066ff;
@@ -9,7 +9,7 @@
   -webkit-text-fill-color: transparent;
   position: relative;
   font-family: 'Courier New', Courier, monospace; /* Шрифт в стиле терминала */
-  animation: glow 2s infinite alternate, shine 8s infinite; /* Эффекты свечения и блика */
+  animation: glow 2s infinite alternate;
   overflow: hidden;
 }
 
@@ -22,42 +22,53 @@
   }
 }
 
-/* Линейное переливание: световой блик */
-@keyframes shine {
-  0% {
-    background-position: -200%;
-  }
-  50% {
-    background-position: 200%;
-  }
-  100% {
-    background-position: -200%;
-  }
-}
-
-/* Эффект блика */
-.glow-text::before {
-  content: '';
+/* Псевдоэлементы для создания эффекта глитча */
+.glow-text::before, .glow-text::after {
+  content: attr(data-text); /* Использование того же текста */
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
-  filter: blur(2px); /* Размытие, чтобы полоса не была резкой */
-  animation: move-shine 8s infinite;
-  pointer-events: none; /* Полоса не должна перекрывать клики по тексту */
+  background: transparent;
+  color: #00ccff;
+  z-index: -1;
+  overflow: hidden;
 }
 
-/* Анимация движения полосы */
-@keyframes move-shine {
+.glow-text::before {
+  left: 2px;
+  text-shadow: -2px 0 red;
+  clip: rect(0, 900px, 0, 0); /* Изначально скрыт */
+  animation: glitch-before 1.5s infinite alternate-reverse;
+}
+
+.glow-text::after {
+  left: -2px;
+  text-shadow: -2px 0 blue;
+  clip: rect(0, 900px, 0, 0); /* Изначально скрыт */
+  animation: glitch-after 2s infinite alternate-reverse;
+}
+
+/* Анимация глитч для псевдоэлементов */
+@keyframes glitch-before {
   0% {
-    left: -150%;
-  }
-  50% {
-    left: 150%;
+    clip: rect(15px, 900px, 45px, 0);
+    transform: skew(0.3deg);
   }
   100% {
-    left: -150%;
+    clip: rect(55px, 900px, 90px, 0);
+    transform: skew(-0.3deg);
+  }
+}
+
+@keyframes glitch-after {
+  0% {
+    clip: rect(5px, 900px, 40px, 0);
+    transform: skew(-0.2deg);
+  }
+  100% {
+    clip: rect(60px, 900px, 120px, 0);
+    transform: skew(0.2deg);
   }
 }
