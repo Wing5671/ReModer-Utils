@@ -813,6 +813,26 @@
         overflow: hidden;
     `;
 
+    const uploadCardButton = document.createElement("div");
+        uploadCardButton.style.cssText = `
+        position: fixed;
+        bottom: 140px;
+        right: 20px;
+        z-index: 10000;
+        width: 50px;
+        height: 50px;
+        background-color: #2f3640;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    `;
+
+    uploadCardButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 14 14"><g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 12.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1H9L12.5 4z"/><path d="m9 6.5l-2-2l-2 2m2-2V10"/></g></svg>`
     gearButton.innerHTML = `<svg  version="1.0" xmlns="http://www.w3.org/2000/svg"  width="128.000000pt" height="128.000000pt" viewBox="0 0 128.000000 128.000000"  preserveAspectRatio="xMidYMid meet">  <g transform="translate(0.000000,128.000000) scale(0.050000,-0.050000)" fill="#ffffff" stroke="none"> <path d="M1060 2106 c-32 -166 -28 -161 -148 -219 l-109 -54 -116 43 c-135 50 -121 57 -246 -144 l-86 -139 103 -98 c101 -98 102 -100 102 -222 l1 -123 -103 -91 -103 -91 95 -164 c106 -183 99 -179 247 -123 l106 40 90 -44 c116 -59 131 -79 167 -225 l30 -122 189 0 189 0 31 124 c34 137 53 162 168 222 76 40 77 40 188 2 152 -52 145 -55 240 103 107 177 106 187 -15 299 -96 89 -100 97 -100 199 0 103 4 111 100 199 120 111 120 104 21 273 -104 179 -97 174 -217 129 -197 -75 -336 -3 -385 201 l-31 129 -192 6 -193 5 -23 -115z m445 -322 c247 -109 431 -484 238 -484 -75 0 -78 3 -91 80 -68 430 -730 360 -748 -80 -20 -487 653 -584 751 -108 26 121 165 133 165 13 0 -254 -252 -474 -544 -475 -170 0 -224 25 -170 79 18 18 27 47 20 65 -10 26 -19 20 -43 -30 -41 -87 -68 -81 -193 43 -433 433 56 1145 615 897z m-126 -290 c64 -32 141 -146 141 -209 0 -242 -340 -337 -450 -126 -107 207 107 438 309 335z m502 -542 c-19 -24 -16 -27 18 -18 23 6 41 1 41 -12 0 -12 -8 -22 -18 -22 -10 0 -31 -5 -46 -11 -19 -7 -28 6 -28 40 0 31 11 51 28 51 23 0 24 -6 5 -28z"/> </g> </svg> `; // Здесь вставляется SVG код
     cardButton.innerHTML = `
     <svg id="arrowIcon" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -826,6 +846,7 @@
     `;
     document.body.appendChild(gearButton);
     document.body.appendChild(cardButton);
+    document.body.appendChild(uploadCardButton);
 
     gearButton.onclick = function(event) {
         rotateGearIcon();
@@ -842,12 +863,267 @@
         }, 500);
     };
 
+    uploadCardButton.onclick = function(event) {
+        showOverlay();
+    };
+    
+    function showOverlay() {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+    
+        document.body.appendChild(overlay);
+    
+        const modalWindow = document.createElement("div");
+        modalWindow.style.cssText = `
+            background-color: #2C2C2C;
+            padding: 20px;
+            color: white;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            text-align: center;
+            animation: popupIn 0.3s forwards;
+        `;
+    
+        overlay.appendChild(modalWindow);
+        modalWindow.innerHTML = `<h3>Загрузка изображения</h3>`;
+    
+        const dropArea = document.createElement("div");
+        dropArea.style.cssText = `
+            border: 2px dashed #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+        `;
+        dropArea.innerHTML = "Перетащите изображение сюда или нажмите, чтобы выбрать файл. Доступные форматы: <hu1>.jpg, .gif, .png, .webp, .tiff, mp4</hu1><br>Ограничение размера: <hu1>48 MB.</hu1>";
+        modalWindow.appendChild(dropArea);
+    
+        const imgPreview = document.createElement("img");
+        imgPreview.style.cssText = `
+            max-width: 100%;
+            display: none;
+            margin-top: 10px;
+        `;
+        modalWindow.appendChild(imgPreview);
+    
+        const buttonStyles = (backgroundColor) => `
+            background-color: ${backgroundColor};
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        `;
+    
+        const createStyledButton = (text, onClick, styles) => {
+            const button = document.createElement("button");
+            button.innerText = text;
+            button.style.cssText = styles;
+            button.disabled = false;
+            button.style.opacity = "1"; 
+    
+            button.onmouseover = () => {
+                if (!button.disabled) {
+                    button.style.opacity = "0.8";
+                }
+            };
+            button.onmouseout = () => {
+                button.style.opacity = button.disabled ? "0.5" : "1"; 
+            };
+            button.onclick = () => {
+                if (!button.disabled) onClick(); 
+            };
+            return button;
+        };
+    
+        const cancelButton = createStyledButton("Отменить", () => {
+            document.body.removeChild(overlay);
+        }, buttonStyles("#f44336"));
+    
+        const resetButton = createStyledButton("Сбросить", () => {
+            imgPreview.style.display = "none";
+            dropArea.innerHTML = "Перетащите изображение сюда или нажмите, чтобы выбрать файл. Доступные форматы: <hu1>.jpg, .gif, .png, .webp, .tiff, mp4</hu1><br>Ограничение размера: <hu1>48 MB.</hu1>";
+        }, buttonStyles("#9E9E9E"));
+    
+        const confirmButton = createStyledButton("Подтвердить", () => {
+            const file = dropArea.file; 
+            uploadImage(file, confirmButton, cancelButton, resetButton);
+        }, buttonStyles("#4CAF50")); 
+    
+        modalWindow.appendChild(cancelButton);
+        modalWindow.appendChild(resetButton);
+        modalWindow.appendChild(confirmButton);
+    
+        overlay.onclick = function(event) {
+            if (event.target === overlay) {
+                overlay.style.animation = "popupOut 0.1s forwards";
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                }, 500);
+            }
+        };
+    
+        dropArea.onclick = function() {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                handleFile(file);
+            };
+            input.click();
+        };
+    
+        dropArea.ondrop = (event) => {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            handleFile(file);
+        };
+    
+        dropArea.ondragover = (event) => {
+            event.preventDefault();
+        };
+    
+        overlay.style.display = "flex";
+    
+        function handleFile(file) {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.display = "block";
+                    dropArea.innerText = "Изображение загружено. Нажмите 'Подтвердить' для отправки.";
+                    dropArea.file = file;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    
+        function uploadImage(file, confirmButton, cancelButton, resetButton) {
+            const formData = new FormData();
+            formData.append("media", file);
+            formData.append("key", "00045ded801e46a4f9755c8524c5ea2f");
+        
+            confirmButton.disabled = true;
+            resetButton.disabled = true;
+            cancelButton.disabled = true; 
+        
+            confirmButton.style.opacity = "0.5"; 
+            resetButton.style.opacity = "0.5"; 
+            cancelButton.style.opacity = "0.5"; 
+        
+            confirmButton.innerHTML = "Загрузка...";
+            confirmButton.classList.add("loading");
+        
+            fetch("https://thumbsnap.com/api/upload", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                confirmButton.innerHTML = "Подтвердить";
+                confirmButton.classList.remove("loading");
+        
+                cancelButton.disabled = false; 
+                resetButton.disabled = false; 
+        
+                confirmButton.style.opacity = "1"; 
+                resetButton.style.opacity = "1"; 
+                cancelButton.style.opacity = "1"; 
+        
+                if (data.success) {
+                    const link = data.data.url;
+                    const template = `<a target="_blank" href="${link}"><b style="--r-primary:217 91% 60%;color:hsl(var(--r-primary));transition:color 0.3s;cursor:pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='hsl(var(--r-primary))'">Посмотреть пример</b></a>`;
+                    replaceContentWithAnimation(modalWindow, template);
+                } else {
+                    console.error("Ошибка загрузки:", data.error.message);
+                    resetButton.disabled = false;
+                    cancelButton.disabled = false;
+                    confirmButton.disabled = false; 
+        
+                    resetButton.style.opacity = "1";
+                    cancelButton.style.opacity = "1";
+                    confirmButton.style.opacity = "1";
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка сети:", error);
+                resetButton.disabled = false;
+                cancelButton.disabled = false;
+                confirmButton.disabled = false;
+        
+                resetButton.style.opacity = "1";
+                cancelButton.style.opacity = "1";
+                confirmButton.style.opacity = "1";
+            });
+        }
+        function replaceContentWithAnimation(modalWindow, newContent) {
+            modalWindow.style.animation = "slideOut 0.3s forwards";
+            setTimeout(() => {
+                modalWindow.innerHTML = `<h1 style="font-size: 32px; font-weight: bold;">Изображение загружено! Готовый шаблон:</h1>`;
+                const linkElement = document.createElement("div");
+                linkElement.textContent = newContent;
+                modalWindow.appendChild(linkElement);
+                modalWindow.style.animation = "slideIn 0.3s forwards";
+            }, 300);
+        }
+    };              
+    
+    
+
     // hover-эффекты
     gearButton.onmouseenter = () => gearButton.classList.add('button-hover');
     gearButton.onmouseleave = () => gearButton.classList.remove('button-hover');
     cardButton.onmouseenter = () => cardButton.classList.add('button-hover');
     cardButton.onmouseleave = () => cardButton.classList.remove('button-hover');
+    uploadCardButton.onmouseenter = () => uploadCardButton.classList.add('button-hover');
+    uploadCardButton.onmouseleave = () => uploadCardButton.classList.remove('button-hover');
     GM_addStyle(`
+        .button.loading {
+            position: relative;
+            position: relative;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .button:disabled {
+            background-color: #ccc; /* Серый цвет */
+            cursor: not-allowed; /* Курсор "запрещено" */
+            opacity: 0.6;
+            }
+
+        .button.loading::after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgb(0, 0, 0);
+            border-color: rgb(87, 87, 87) transparent rgb(0, 0, 0) transparent;
+            border-radius: 50%;
+            animation: loading-spin 1.2s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes loading-spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
         @keyframes rotateGear {
             from {
                 transform: rotate(0deg);
@@ -865,6 +1141,14 @@
             to {
                 fill: green;
             }
+        }
+        @keyframes slideOut {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); opacity: 0; }
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(50%); opacity: 0; }
+            100% { transform: translateX(0); }
         }
         @keyframes rippleEffect {
         from {
