@@ -1,0 +1,75 @@
+.glow-text {
+  margin: 5px;
+  font-size: 25px;
+  font-weight: bold;
+  color: #00ccff; /* Синий неоновый цвет */
+  text-shadow: 0 0 10px #00ccff, 0 0 20px #0099ff, 0 0 30px #0066ff;
+  background: linear-gradient(to right, #00ccff, #003366); /* Переливание синих оттенков */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  font-family: 'Courier New', Courier, monospace; /* Шрифт в стиле терминала */
+  animation: glow 2s infinite alternate;
+  overflow: visible; /* Открыть содержимое за границами контейнера */
+  padding: 20px; /* Добавить дополнительные отступы, чтобы свечение не обрезалось */
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px #00ccff, 0 0 20px #0099ff, 0 0 30px #0066ff;
+  }
+  100% {
+    text-shadow: 0 0 20px #00ccff, 0 0 30px #0099ff, 0 0 40px #0066ff;
+  }
+}
+
+/* Псевдоэлементы для создания эффекта глитча */
+.glow-text::before, .glow-text::after {
+  content: attr(data-text); /* Использование того же текста */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: #00ccff;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.glow-text::before {
+  left: 2px;
+  text-shadow: -2px 0 red;
+  clip: rect(0, 900px, 0, 0); /* Изначально скрыт */
+  animation: glitch-before 1.5s infinite alternate-reverse;
+}
+
+.glow-text::after {
+  left: -2px;
+  text-shadow: -2px 0 blue;
+  clip: rect(0, 900px, 0, 0); /* Изначально скрыт */
+  animation: glitch-after 2s infinite alternate-reverse;
+}
+
+/* Анимация глитч для псевдоэлементов */
+@keyframes glitch-before {
+  0% {
+    clip: rect(15px, 900px, 45px, 0);
+    transform: skew(0.3deg);
+  }
+  100% {
+    clip: rect(55px, 900px, 90px, 0);
+    transform: skew(-0.3deg);
+  }
+}
+
+@keyframes glitch-after {
+  0% {
+    clip: rect(5px, 900px, 40px, 0);
+    transform: skew(-0.2deg);
+  }
+  100% {
+    clip: rect(60px, 900px, 120px, 0);
+    transform: skew(0.2deg);
+  }
+}
