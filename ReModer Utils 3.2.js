@@ -1119,7 +1119,7 @@ if (loadToggleState('elementSize')) {
 }
 if (loadToggleState('autoRedirect')) {
     autored = true;
-    // fetchRequests()
+    fetchRequests()
 }
 if (loadToggleState('autoScroll')) {
     if (
