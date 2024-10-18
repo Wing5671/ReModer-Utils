@@ -864,10 +864,10 @@
     };
 
     uploadCardButton.onclick = function(event) {
-        showOverlay();
+        showCardOverlay();
     };
     
-    function showOverlay() {
+    function showCardOverlay() {
         const overlay = document.createElement("div");
         overlay.style.cssText = `
             position: fixed;
