@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.3.1
+// @version      3.3.2
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -1048,22 +1048,26 @@
     
         function uploadImage(file, confirmButton, cancelButton, resetButton) {
             const formData = new FormData();
-            formData.append("media", file);
-            formData.append("key", "00045ded801e46a4f9755c8524c5ea2f");
-        
+            formData.append("image", file); 
+            formData.append("title", "Simple upload"); 
+            formData.append("description", "This is a simple image upload in Imgur"); 
+            
             confirmButton.disabled = true;
             resetButton.disabled = true;
-            cancelButton.disabled = true; 
+            cancelButton.disabled = true;
         
-            confirmButton.style.opacity = "0.5"; 
-            resetButton.style.opacity = "0.5"; 
-            cancelButton.style.opacity = "0.5"; 
+            confirmButton.style.opacity = "0.5";
+            resetButton.style.opacity = "0.5";
+            cancelButton.style.opacity = "0.5";
         
             confirmButton.innerHTML = "Загрузка...";
             confirmButton.classList.add("loading");
         
-            fetch("https://thumbsnap.com/api/upload", {
+            fetch("https://api.imgur.com/3/image", {
                 method: "POST",
+                headers: {
+                    "Authorization": "Client-ID 5ea8e1806943bc1",
+                },
                 body: formData,
             })
             .then(response => response.json())
@@ -1071,22 +1075,22 @@
                 confirmButton.innerHTML = "Подтвердить";
                 confirmButton.classList.remove("loading");
         
-                cancelButton.disabled = false; 
-                resetButton.disabled = false; 
+                cancelButton.disabled = false;
+                resetButton.disabled = false;
         
-                confirmButton.style.opacity = "1"; 
-                resetButton.style.opacity = "1"; 
-                cancelButton.style.opacity = "1"; 
+                confirmButton.style.opacity = "1";
+                resetButton.style.opacity = "1";
+                cancelButton.style.opacity = "1";
         
                 if (data.success) {
-                    const link = data.data.url;
+                    const link = data.data.link;
                     const template = `<a target="_blank" href="${link}"><b style="--r-primary:217 91% 60%;color:hsl(var(--r-primary));transition:color 0.3s;cursor:pointer;" onmouseover="this.style.color='white'" onmouseout="this.style.color='hsl(var(--r-primary))'">Посмотреть пример</b></a>`;
                     replaceContentWithAnimation(modalWindow, template);
                 } else {
-                    console.error("Ошибка загрузки:", data.error.message);
+                    console.error("Ошибка загрузки:", data.data.error);
                     resetButton.disabled = false;
                     cancelButton.disabled = false;
-                    confirmButton.disabled = false; 
+                    confirmButton.disabled = false;
         
                     resetButton.style.opacity = "1";
                     cancelButton.style.opacity = "1";
@@ -1104,6 +1108,7 @@
                 confirmButton.style.opacity = "1";
             });
         }
+        
         
         function replaceContentWithAnimation(modalWindow, newContent) {
             modalWindow.style.animation = "slideOut 0.3s forwards";
