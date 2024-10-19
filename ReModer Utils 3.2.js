@@ -910,13 +910,27 @@
         dropArea.innerHTML = "Перетащите изображение сюда или нажмите, чтобы выбрать файл. Доступные форматы: <hu1>.jpg, .gif, .png, .webp, .tiff, mp4</hu1><br>Ограничение размера: <hu1>48 MB.</hu1>";
         modalWindow.appendChild(dropArea);
     
+        const imgContainer = document.createElement("div");
+        imgContainer.style.cssText = `
+            width: 300px;
+            height: 400px;
+            margin: 20px auto;
+            overflow: hidden;
+            position: relative;
+            display: none;
+            border: 2px solid white;
+            border-radius: 10px;
+        `;
+        modalWindow.appendChild(imgContainer);
+    
         const imgPreview = document.createElement("img");
         imgPreview.style.cssText = `
-            max-width: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             display: none;
-            margin-top: 10px;
         `;
-        modalWindow.appendChild(imgPreview);
+        imgContainer.appendChild(imgPreview);
     
         const buttonStyles = (backgroundColor) => `
             background-color: ${backgroundColor};
@@ -933,6 +947,7 @@
             const button = document.createElement("button");
             button.innerText = text;
             button.style.cssText = styles;
+            button.style.display = "none";
             button.disabled = false;
             button.style.opacity = "1"; 
     
@@ -956,6 +971,10 @@
     
         const resetButton = createStyledButton("Сбросить", () => {
             imgPreview.style.display = "none";
+            imgContainer.style.display = "none";
+            resetButton.style.display = "none";
+            cancelButton.style.display = "none";
+            confirmButton.style.display = "none";
             dropArea.innerHTML = "Перетащите изображение сюда или нажмите, чтобы выбрать файл. Доступные форматы: <hu1>.jpg, .gif, .png, .webp, .tiff, mp4</hu1><br>Ограничение размера: <hu1>48 MB.</hu1>";
         }, buttonStyles("#9E9E9E"));
     
@@ -998,6 +1017,16 @@
             event.preventDefault();
         };
     
+        document.addEventListener("paste", (event) => {
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === "file" && items[i].type.startsWith("image/")) {
+                    const file = items[i].getAsFile();
+                    handleFile(file);
+                }
+            }
+        });
+    
         overlay.style.display = "flex";
     
         function handleFile(file) {
@@ -1006,7 +1035,11 @@
                 reader.onload = (e) => {
                     imgPreview.src = e.target.result;
                     imgPreview.style.display = "block";
+                    imgContainer.style.display = "block";
                     dropArea.innerText = "Изображение загружено. Нажмите 'Подтвердить' для отправки.";
+                    cancelButton.style.display = "inline";
+                    confirmButton.style.display = "inline";
+                    resetButton.style.display = "inline";
                     dropArea.file = file;
                 };
                 reader.readAsDataURL(file);
@@ -1071,17 +1104,19 @@
                 confirmButton.style.opacity = "1";
             });
         }
+        
         function replaceContentWithAnimation(modalWindow, newContent) {
             modalWindow.style.animation = "slideOut 0.3s forwards";
             setTimeout(() => {
                 modalWindow.innerHTML = `<h1 style="font-size: 32px; font-weight: bold;">Изображение загружено! Готовый шаблон:</h1>`;
                 const linkElement = document.createElement("div");
-                linkElement.textContent = newContent;
+                linkElement.innerHTML = newContent;
                 modalWindow.appendChild(linkElement);
                 modalWindow.style.animation = "slideIn 0.3s forwards";
             }, 300);
         }
-    };              
+    };
+           
     
     
 
