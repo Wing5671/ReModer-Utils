@@ -1110,7 +1110,8 @@
             setTimeout(() => {
                 modalWindow.innerHTML = `<h1 style="font-size: 32px; font-weight: bold;">Изображение загружено! Готовый шаблон:</h1>`;
                 const linkElement = document.createElement("div");
-                linkElement.innerHTML = newContent;
+                linkElement.style.color = '#6495ED';
+                linkElement.textContent = newContent;
                 modalWindow.appendChild(linkElement);
                 modalWindow.style.animation = "slideIn 0.3s forwards";
             }, 300);
