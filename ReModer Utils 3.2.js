@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.3.2
+// @version      3.3.3
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -16,6 +16,7 @@
     let toggle_elements = false;
     let AutoSort = false;
     let autored = false;
+    let delelement = false;
     function createToggle(setting) {
         const settingContainer = document.createElement('div');
         settingContainer.className = 'setting';
@@ -48,7 +49,7 @@
         settingContainer.appendChild(infoButton);
 
         const label = document.createElement('label');
-        label.textContent = setting.label;
+        label.innerHTML = setting.label;
         label.style.marginLeft = '28px';
         settingContainer.appendChild(label);
 
@@ -129,6 +130,18 @@
             }
         },
         {
+            key: 'deleteElement',
+            label: 'Удалять стандартный контейнер карт. <div style="color: white; background-color: red; border: 2px solid red; padding: 1px 5px; display: inline-block; border-radius: 35px;">NEW</div>',
+            info: 'Удаляет стандартный контейнер отображающий все карты для персонажа. (Макс, сделай горизонтально:))',
+            onToggle: (state) => {
+                if (state) {
+                    DeleteElement();
+                } else {
+                    DeleteElement();
+                }
+            }
+        },
+        {
             key: 'autoRedirect',
             label: '❌ Авто-редирект на следующую заявку',
             info: 'После принятия/отклонения заявки вы будете автоматически перенаправлены на следующую заявку в списке.',
@@ -175,6 +188,10 @@
 
     function sizeElement() {
         sizebtn = !sizebtn;
+    };
+
+    function DeleteElement() {
+        delelement = !delelement;
     };
 
     // ------------------------------------------------------------------------- Redirect
@@ -1327,6 +1344,10 @@
     let isLinkOpened = false;
     const ReactBypass = new MutationObserver(() => {
         document.querySelectorAll('.css-67o4bn a[href*="/titles/"], .css-67o4bn a[href*="/characters/"]').forEach((element) => {
+            if (delelement) {
+                let badElement = document.querySelector("div.MuiBox-root.css-aawage");
+                if (badElement) {badElement.parentNode.removeChild(badElement);};
+            };
             element.addEventListener('click', function (event) {
                 if (isLinkOpened) {
                     return;
@@ -1416,7 +1437,7 @@
             }
         }
     });
-    
+
 const str = '?filter=%7B%22status%22%3A%221_open%22%2C%22type%22%3A%5B%22character_update%22%2C%22character_add%22%2C%22card_item_add%22%2C%22card_item_update%22%5D%7D&order=DESC&page=1&perPage=400&sort=created_at';
 
 if (loadToggleState('AutoSort')) {
@@ -1441,6 +1462,10 @@ if (loadToggleState('elementSize')) {
 
 if (loadToggleState('autoRedirect')) {
     autored = true;
+}
+
+if (loadToggleState('deleteElement')) {
+    delelement = true;
 }
 
 if (loadToggleState('autoScroll')) {
