@@ -1416,42 +1416,35 @@
             }
         }
     });
-const str = '?filter=%7B%22status%22%3A%221_open%22%2C%22type%22%3A%5B%22character_update%22%2C%22character_add%22%2C%22card_item_add%22%2C%22card_item_update%22%5D%7D&order=DESC&page=1&perPage=400&sort=created_at'
+    
+const str = '?filter=%7B%22status%22%3A%221_open%22%2C%22type%22%3A%5B%22character_update%22%2C%22character_add%22%2C%22card_item_add%22%2C%22card_item_update%22%5D%7D&order=DESC&page=1&perPage=400&sort=created_at';
+
 if (loadToggleState('AutoSort')) {
     if (
-        !window.location.href.includes(
-            'https://panel.remanga.org/requests'
-        ) || window.location.href.includes(
-            'https://panel.remanga.org/requests/'
-        )
+        window.location.href.includes('https://panel.remanga.org/requests') &&
+        !window.location.href.includes('https://panel.remanga.org/requests/')
     ) {
-        return;
-    } else {
-        if (
-            !window.location.href.includes(str)
-            )
-        {
+        if (!window.location.href.includes(str)) {
             const newUrl = window.location.origin + window.location.pathname + str;
             window.location.href = newUrl;
         }
     }
 }
+
 if (loadToggleState('fixElements')) {
     toggle_elements = true;
 }
+
 if (loadToggleState('elementSize')) {
     sizebtn = true;
 }
+
 if (loadToggleState('autoRedirect')) {
     autored = true;
-    fetchRequests()
 }
+
 if (loadToggleState('autoScroll')) {
-    if (
-        !window.location.href.includes('https://panel.remanga.org/requests')
-    ) {
-        return;
-    } else {
+    if (window.location.href.includes('https://panel.remanga.org/requests')) {
         const scrollSpeed = 300;
         const scrollInterval = 1;
         autoScrollInterval = setInterval(() => {
