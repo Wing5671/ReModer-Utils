@@ -2,7 +2,7 @@
 // @name         Re:Moder Utils
 // @author       mr.kanon
 // @description  Плагин расширяющий возможности модерации карт.
-// @version      3.3.3
+// @version      3.3.4
 // @match        *://*.remanga.org/*
 // @connect      api.remanga.org
 // @connect      remanga.org
@@ -214,9 +214,9 @@
             alert('Некорректный ID персонажа.');
             return;
         }
-
+    
         const url = `https://api.remanga.org/api/inventory/character/${characterId}/cards/?page=1&count=20`;
-
+    
         GM_xmlhttpRequest({
             method: "GET",
             url: url,
@@ -230,7 +230,7 @@
                     alert('Ошибка при получении данных о картах персонажа.');
                     return;
                 }
-
+    
                 let data;
                 try {
                     data = JSON.parse(response.responseText);
@@ -239,13 +239,14 @@
                     alert('Ошибка при обработке данных.');
                     return;
                 }
-
+    
                 if (!data || !Array.isArray(data.results)) {
                     console.error('Неверный формат данных или пустой ответ.');
                     alert('Данные о картах не найдены.');
                     return;
                 }
-
+                console.log(data.results);
+    
                 const rankCards = {
                     rank_a: [],
                     rank_b: [],
@@ -254,11 +255,14 @@
                     rank_e: [],
                     rank_f: []
                 };
-
+    
                 data.results.forEach(card => {
+                    const _id = card.id || 'unknown';
+                    const author_username = card.author.username || 'unknown';
+                    const author_id = card.author.id || 'unknown';
                     const rank = card.rank || 'unknown';
                     const cover = card.cover && card.cover.mid ? `https://remanga.org/media/${card.cover.mid}` : null;
-
+    
                     let borderColor;
                     switch (rank) {
                         case 'rank_a':
@@ -283,21 +287,24 @@
                             borderColor = "linear-gradient(135deg, gray, darkgray)";
                             break;
                     }
-
+    
                     if (rankCards.hasOwnProperty(rank)) {
                         rankCards[rank].push({
+                            cardID: _id,
                             thumbnail: cover || 'https://static.vecteezy.com/system/resources/previews/004/141/669/original/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg',
-                            borderColor: borderColor
+                            borderColor: borderColor,
+                            author: author_username,
+                            author_id: author_id
                         });
                     }
                 });
-
+    
                 const hasCards = Object.values(rankCards).some(cards => cards.length > 0);
-
+    
                 if (!hasCards) {
                     showPopup(null);
                 } else {
-                    showPopup(rankCards);
+                    getModeratorsForCards(rankCards);
                 }
             },
             onerror: function(error) {
@@ -306,7 +313,108 @@
             }
         });
     }
-
+    
+    async function getModeratorsForCards(rankCards) {
+        const allPromises = [];
+        const moderatorCache = new Map();
+    
+        Object.keys(rankCards).forEach(rank => {
+            rankCards[rank].forEach(card => {
+                const moderatorUrl = `https://remanga.org/admin/inventory/carditem/${card.cardID}/delete/`;
+    
+                const requestPromise = (async () => {
+                    try {
+                        const response = await fetchRequest(moderatorUrl);
+                        if (response.status !== 200) {
+                            console.error('Ошибка при получении данных модератора.');
+                            return { ...card, moderator: "Ошибка при получении данных" }; 
+                        }
+    
+                        const bodyHTML = response.bodyText;
+                        const startIndex = bodyHTML.indexOf("Модерация запроса:");
+                        let moderatorId = null;
+    
+                        if (startIndex !== -1) {
+                            const anchorStart = bodyHTML.indexOf('<a href="', startIndex);
+                            if (anchorStart !== -1) {
+                                const hrefStart = bodyHTML.indexOf('/changerequest/', anchorStart);
+                                if (hrefStart !== -1) {
+                                    const idStart = hrefStart + '/changerequest/'.length;
+                                    const idEnd = bodyHTML.indexOf('/', idStart);
+                                    moderatorId = bodyHTML.substring(idStart, idEnd);
+                                    console.log(moderatorId); 
+                                }
+                            }
+                        } else {
+                            console.error("Строка 'Модерация запроса:' не найдена");
+                        }
+                        console.log(response.bodyText);
+    
+                        if (moderatorId) {
+                            if (moderatorCache.has(moderatorId)) {
+                                card.moderator = moderatorCache.get(moderatorId);
+                            } else {
+                                const moderatorResponse = await fetchRequest(`https://panel.remanga.org/api/v2/panel/requests/${moderatorId}/`);
+                                
+                                let apiData;
+                                try {
+                                    apiData = JSON.parse(moderatorResponse.bodyText);
+                                    const moderatorName = apiData.moderator ? apiData.moderator.username : "Модератор не назначен";
+                                    moderatorCache.set(moderatorId, moderatorName);
+                                    card.moderator = moderatorName;
+                                } catch (jsonError) {
+                                    console.error('Ошибка при парсинге JSON:', jsonError);
+                                    console.error('Ответ от API:', moderatorResponse.bodyText);
+                                    card.moderator = "Ошибка парсинга данных о модераторе";
+                                }
+                            }
+                        } else {
+                            card.moderator = "ID заявки не найден";
+                        }
+    
+                        return card; 
+                    } catch (error) {
+                        console.error('Ошибка при выполнении запроса на модератора:', error);
+                        return { ...card, moderator: "Ошибка запроса" }; 
+                    }
+                })();
+    
+                allPromises.push(requestPromise);
+            });
+        });
+    
+        const results = await Promise.allSettled(allPromises);
+        const successfulResults = results.map(result => result.status === 'fulfilled' ? result.value : result.reason);
+        
+        Object.keys(rankCards).forEach(rank => {
+            rankCards[rank] = rankCards[rank].map(card => {
+                const updatedCard = successfulResults.find(res => res.cardID === card.cardID);
+                return updatedCard || card; 
+            });
+        });
+    
+        showPopup(rankCards);
+    }
+    
+    function fetchRequest(url) {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url,
+                onload: function(response) {
+                    resolve({
+                        status: response.status,
+                        bodyText: response.responseText
+                    });
+                },
+                onerror: function(error) {
+                    reject(error);
+                }
+            });
+        });
+    }
+    
+    
 
     // ------------------------------------------------------------------------- character
 
@@ -389,8 +497,6 @@
 
         infoModalWindow.innerHTML = `<p>${infoContent}</p>`;
         infoOverlay.appendChild(infoModalWindow);
-
-        // Закрытие попапа при клике за его пределами
         infoOverlay.onclick = function(event) {
             if (event.target === infoOverlay) {
                 infoOverlay.style.animation = "popupOut 0.1s forwards";
@@ -406,6 +512,7 @@
     // ------------------------------------------------------------------------- popUp
 
     function showPopup(rankCards) {
+        console.log(rankCards);
         const overlay = document.createElement("div");
         overlay.style.cssText = `
             position: fixed;
@@ -547,7 +654,7 @@
                         thumbnail.style.borderColor = "transparent";
                     };
                 thumbnail.onclick = function() {
-                showFullImage(card.thumbnail, thumbnail);
+                showFullImage(card.thumbnail, thumbnail, card.cardID, card.moderator, card.author, card.author_id);
                 };
 
                     cardsRow.appendChild(thumbnail);
@@ -559,10 +666,9 @@
     })}
 
     // ------------------------------------------------------------------------- fullImage
-
-    function showFullImage(src, thumbnail) {
+    function showFullImage(src, thumbnail, cardId, moderatorName, author, author_id) {
         const thumbnailRect = thumbnail.getBoundingClientRect();
-
+    
         const fullOverlay = document.createElement("div");
         fullOverlay.style.cssText = `
             position: fixed;
@@ -577,87 +683,100 @@
             z-index: 9999;
             opacity: 0;
             animation: fadeIn 0.5s forwards;
-    `;
-
+        `;
+    
         const fullImage = document.createElement("img");
-            fullImage.src = src;
-            fullImage.style.cssText = `
-                position: absolute;
-                width: ${thumbnailRect.width}px;
-                height: ${thumbnailRect.height}px;
-                top: ${thumbnailRect.top}px;
-                left: ${thumbnailRect.left}px;
-                object-fit: cover;
-                border-radius: 10px;
-                transition: all 0.3s ease-in-out;
-    `;
-
-            fullImage.onload = function() {
-                const naturalWidth = fullImage.naturalWidth;
-                const naturalHeight = fullImage.naturalHeight;
-
-                requestAnimationFrame(() => {
-                    fullImage.style.width = `${naturalWidth}px`;
-                    fullImage.style.height = `${naturalHeight}px`;
-                    fullImage.style.top = "50%";
-                    fullImage.style.left = "50%";
-                    fullImage.style.transform = "translate(-50%, -50%)";
-                });
-            };
-
-            const closeFullButton = document.createElement("div");
-            closeFullButton.innerHTML = "✖";
-            closeFullButton.style.cssText = `
-                position: absolute;
-                bottom: 180px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 40px;
-                height: 40px;
-                background-color: rgba(4, 0, 0, 0.5);
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 24px;
-                color: white;
-                cursor: pointer;
-                margin-top: 20px;
-    `;
-
-            fullOverlay.appendChild(fullImage);
-            fullOverlay.appendChild(closeFullButton);
-            document.body.appendChild(fullOverlay);
-            closeButton.onclick = closePopup;
-            fullOverlay.onclick = function(event) {
+        fullImage.src = src;
+        fullImage.style.cssText = `
+            position: absolute;
+            width: ${thumbnailRect.width}px;
+            height: ${thumbnailRect.height}px;
+            top: ${thumbnailRect.top}px;
+            left: ${thumbnailRect.left}px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+        `;
+    
+        fullImage.onload = function() {
+            const naturalWidth = fullImage.naturalWidth;
+            const naturalHeight = fullImage.naturalHeight;
+    
+            requestAnimationFrame(() => {
+                fullImage.style.width = `${naturalWidth}px`;
+                fullImage.style.height = `${naturalHeight}px`;
+                fullImage.style.top = "50%";
+                fullImage.style.left = "50%";
+                fullImage.style.transform = "translate(-50%, -50%)";
+            });
+        };
+    
+        // Создание контейнера для информации
+        const infoContainer = document.createElement("div");
+        infoContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            right: 550px;
+            transform: translateY(-50%);
+            color: white;
+            text-align: left;
+            max-width: 250px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 16px;
+        `;
+    
+        infoContainer.innerHTML = `
+            <strong>Модератор:</strong> ${moderatorName || 'Не назначен'}<br>
+            <strong>Автор:</strong> ${author || 'Не указан'}<br>
+            <strong>ID Автора:</strong> ${author_id || 'Не указан'}
+        `;
+    
+        const closeFullButton = document.createElement("div");
+        closeFullButton.innerHTML = "✏";
+        closeFullButton.style.cssText = `
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(4, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        `;
+    
+        fullOverlay.appendChild(fullImage);
+        fullOverlay.appendChild(infoContainer); 
+        fullOverlay.appendChild(closeFullButton);
+        document.body.appendChild(fullOverlay);
+    
+        closeFullButton.onclick = function () {
+            window.open(`https://remanga.org/admin/inventory/carditem/${cardId}/change/`, "_blank");
+        };
+    
+        fullOverlay.onclick = function(event) {
             if (event.target === fullOverlay) {
                 fullImage.style.width = `${thumbnailRect.width}px`;
                 fullImage.style.height = `${thumbnailRect.height}px`;
                 fullImage.style.top = `${thumbnailRect.top}px`;
                 fullImage.style.left = `${thumbnailRect.left}px`;
                 fullImage.style.transform = "";
-
+    
                 fullOverlay.style.animation = "fadeOut 0.3s forwards";
-
+    
                 setTimeout(() => {
                     document.body.removeChild(fullOverlay);
                 }, 500);
-                }
-            };
-            closeFullButton.onclick = function () {
-                fullImage.style.width = `${thumbnailRect.width}px`;
-                fullImage.style.height = `${thumbnailRect.height}px`;
-                fullImage.style.top = `${thumbnailRect.top}px`;
-                fullImage.style.left = `${thumbnailRect.left}px`;
-                fullImage.style.transform = "";
-
-                fullOverlay.style.animation = "fadeOut 0.3s forwards";
-
-                setTimeout(() => {
-                    document.body.removeChild(fullOverlay);
-                }, 500);
-            };
-        };
+            }
+        }
+    }
 
         popup.appendChild(closeButton);
         popup.appendChild(cardsContainer);
